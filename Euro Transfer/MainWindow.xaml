@@ -1,0 +1,332 @@
+﻿<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Euro_Transfer"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="Euro_Transfer.MainWindow"
+    Title="Euro Transfer" Height="380" Width="380" ResizeMode="CanMinimize" 
+    WindowStartupLocation="CenterScreen" WindowStyle="None" Loaded="Window_Loaded" 
+    SizeToContent="Height" PreviewKeyDown="Window_PreviewKeyDown"  AllowsTransparency="True">
+
+    <Window.Resources>
+
+        <Style x:Key="labelStyle">
+            <Setter Property="Control.FontWeight" Value="Bold"/>
+            <Setter Property="FrameworkElement.Width" Value="20"/>
+            <Setter Property="Control.HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="FrameworkElement.Margin" Value="2,0,2,0"/>
+        </Style>
+
+        <Style x:Key="closeStyle" BasedOn="{StaticResource labelStyle}">
+            <Setter Property="Control.FontWeight" Value="Bold"/>
+            <Style.Triggers>
+                <Trigger  Property="UIElement.IsMouseOver" Value="true">
+                    <Setter Property="Control.Background" Value="#C5FF0000"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="minimizeStyle" BasedOn="{StaticResource labelStyle}">
+            <Style.Triggers>
+                <Trigger  Property="UIElement.IsMouseOver" Value="true">
+                    <Setter Property="Control.Background" Value="LightGreen"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Window.Background>
+        <RadialGradientBrush>
+            <GradientStop Offset="-1" Color="Blue"/>
+            <GradientStop Offset="0.9" Color="Gray"/>
+        </RadialGradientBrush>
+    </Window.Background>
+
+    <Grid x:Name="MainGrid">
+
+        <TabControl Background="CornflowerBlue" Margin="4,4,4,4" BorderThickness="2"
+		BorderBrush="Black" SnapsToDevicePixels="True" x:Name="MainTab" >
+            <TabItem Header="Euro Transfer" IsSelected="True"  IsTabStop="False" Margin="0">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="175"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="60"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition Width="4*"/>
+                    </Grid.ColumnDefinitions>
+                    <Popup Name="popup" PlacementTarget="{Binding ElementName=textBox1}" Closed="popup_Closed"
+                        Width="{Binding ElementName=textBox1,Path=ActualWidth}" AllowsTransparency="True"
+                        StaysOpen="False" Placement="Bottom" PopupAnimation="Slide">
+                        <StackPanel>
+                            <TextBlock Name="didMeanText" Text="Did you mean:" Background="Wheat" FontFamily="SimSun" />
+                            <ListBox Name="possibleCustomers" MouseDoubleClick="possibleCustomers_MouseDoubleClick">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Username}" Margin="3"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Popup>
+
+                    <ComboBox Name="ResellersComboBox" Grid.Column="0" Grid.Row="1" DisplayMemberPath="Name"
+                            SelectedValuePath="Customers" HorizontalContentAlignment="Center" IsTabStop="False"/>
+                    <TextBlock Grid.Row="3" HorizontalAlignment="Right" Margin="5" FontSize="16" FontWeight="Bold" FontFamily="Tahoma"
+						Text="Transfer Amount" VerticalAlignment="Center"  />
+
+                    <TextBox Grid.Column="1" Grid.Row="1"  HorizontalAlignment="Stretch" Margin="5,0,5,0"
+					         x:Name="textBox1"  TabIndex="0" PreviewKeyDown="textBox1_PreviewKeyDown"
+					         TextChanged="textBox1_TextChanged" IsEnabled="{Binding ElementName=CustomersListBox,Path=HasItems}"/>
+                    <StackPanel Grid.Column="1" Grid.Row="2" Margin="5,0,5,5">
+                        <ListBox HorizontalContentAlignment="Stretch" ItemsSource="{Binding SelectedValue, ElementName=ResellersComboBox}"
+					x:Name="CustomersListBox" MinHeight="100" MaxHeight="170" ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+					SelectionChanged="CustomersListBox_SelectionChanged" KeyboardNavigation.TabNavigation="None"
+								 VirtualizingPanel.VirtualizationMode="Recycling">
+                            <ListBox.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListBoxItem}">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <EventSetter Event="Control.MouseDoubleClick" Handler="ListBoxItem_MouseDoubleClick"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="LightGreen"/>
+                                            <Setter Property="Foreground" Value="Black"/>
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListBox.ItemContainerStyle>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid  Background="{Binding Background, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}, Mode=FindAncestor}}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock x:Name="nameText" Text="{Binding Username}" Padding="4" 
+                                		Grid.Column="0" Grid.ColumnSpan="2"/>
+                                        <TextBlock x:Name="statusText" HorizontalAlignment="Left" Text="{Binding Status, StringFormat=(\{0\})}"
+                                		FontSize="8" FontFamily="Segoe Print" Padding="4"
+                                		Grid.Column="1"/>
+                                        <!--TextBlock Grid.Row="1" Text="{Binding Path=Transfers[0].TransferDate,StringFormat={}{0:dd-MM-yy HH:mm}}"
+                                                Visibility="Collapsed"/-->
+
+                                    </Grid>
+                                    <DataTemplate.Triggers>
+                                        <DataTrigger Binding="{Binding IsReseller}" Value="true">
+                                            <Setter TargetName="statusText" Property="Foreground" Value="Blue"/>
+                                            <Setter TargetName="statusText" Property="Text" Value="Reseller"/>
+                                            <Setter TargetName="statusText" Property="Margin" Value="6,2"/>
+                                            <Setter TargetName="statusText" Property="FontWeight" Value="Bold"/>
+                                            <Setter TargetName="statusText" Property="FontSize" Value="10"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsBlocked}" Value="true">
+                                            <Setter Property="Background" TargetName="nameText">
+                                                <Setter.Value>
+                                                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                                        <GradientStop Color="#7FFF2D2D" Offset="0.59"/>
+                                                        <GradientStop Color="White" Offset="1"/>
+                                                        <GradientStop Color="White" Offset="0"/>
+                                                    </LinearGradientBrush>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Status}" Value="NotUsed">
+                                            <Setter Property="Background" Value="#CC999999" TargetName="statusText"/>
+                                        </DataTrigger>
+                                    </DataTemplate.Triggers>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+
+                    <Button Content="Transfer" Grid.Row="4" Height="24" HorizontalAlignment="Right" Grid.Column="1"
+					Margin="0,0,5,4" x:Name="btnTransfer" VerticalAlignment="Bottom" Width="75" IsDefault="True"
+					Click="btnTransfer_Click" IsEnabled="False" IsTabStop="False"/>
+
+                    <StackPanel Orientation="Horizontal" Grid.Column="1" Grid.Row="3" Margin="5">
+                        <ComboBox Height="24" Width="80" HorizontalAlignment="Left"  Padding="3" TabIndex="1"
+						x:Name="cbxValues" VerticalAlignment="Center" HorizontalContentAlignment="Center"
+						SelectedIndex="5"  IsEditable="True">
+                            <ComboBoxItem Content="0"/>
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="5"/>
+                            <ComboBoxItem Content="6"/>
+                            <ComboBoxItem Content="7"/>
+                            <ComboBoxItem Content="8"/>
+                            <ComboBoxItem Content="9"/>
+                            <ComboBoxItem Content="10"/>
+                        </ComboBox>
+                        <Label Content="Transfers" Margin="35,5,5,5" FontSize="18" Cursor="Hand"
+                                VerticalAlignment="Center" FontFamily="Vijaya" Foreground="#FFC52727"
+                                MouseDown="TransfersLabel_MouseDown">
+                            <Label.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="White" Offset="0"/>
+                                    <GradientStop Color="#FF8492EA" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Label.Background>
+                        </Label>
+                    </StackPanel>
+
+                    <TextBlock x:Name="tblkResult" Grid.Row="4" HorizontalAlignment="Left" Grid.ColumnSpan="2" 
+					MouseDown="tblkResult_MouseDown" Cursor="Hand" TextWrapping="Wrap" FontSize="18" Margin="20,5,120,5" FontWeight="Bold"/>
+
+                    <StackPanel Grid.Column="0" Grid.Row="2" HorizontalAlignment="Center">
+                        <StackPanel.Resources>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="FontSize" Value="18"/>
+                                <Setter Property="Margin" Value="2"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <Label Cursor="Hand" Content="Manage Resellers" Margin="2,2,2,10" HorizontalAlignment="Center"
+                            MouseDown="Label_MouseDown"/>
+                        <Grid HorizontalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Column="0" Grid.Row="0" Text="Active : " HorizontalAlignment="Right" ToolTip="Last transfer within 4 weeks"/>
+                            <TextBlock Grid.Column="1" Grid.Row="0"
+                            Text="{Binding ElementName=ResellersComboBox,Path=SelectedItem.ActiveCount}"/>
+
+                            <TextBlock Grid.Column="0" Grid.Row="1" Text="Semi : " HorizontalAlignment="Right" ToolTip="Last transfer between 4 &amp; 8 weeks"/>
+                            <TextBlock Grid.Column="1" Grid.Row="1"
+                            Text="{Binding ElementName=ResellersComboBox,Path=SelectedItem.SemiActiveCount}"/>
+
+                            <TextBlock Grid.Column="0" Grid.Row="2" Text="Inactive : " HorizontalAlignment="Right" ToolTip="Last transfer more than 8 weeks"/>
+                            <TextBlock Grid.Column="1" Grid.Row="2"
+                            Text="{Binding ElementName=ResellersComboBox,Path=SelectedItem.InactiveCount}"/>
+                        </Grid>
+
+                        <Label Cursor="Hand" Content="Update Customers" Margin="2,10,2,2" MouseDown="Label_MouseDown"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Vouchers">
+                <Grid>
+                    <Grid.Resources>
+                        <Style x:Key="titleText" TargetType="{x:Type TextBlock}">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="FontFamily" Value="Tahoma"/>
+                            <Setter Property="FontSize" Value="16"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Margin" Value="5"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="74"/>
+                        <RowDefinition Height="80"/>
+                        <RowDefinition Height="70"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Margin="18,2,18,1" HorizontalAlignment="Center" Width="144" >
+                        <TextBlock Style="{StaticResource titleText}"><Run Text="Voucher Amount"/></TextBlock>
+                        <ComboBox Width="60" IsReadOnly="True" SelectedIndex="0" HorizontalContentAlignment="Center"
+						Margin="10" x:Name="cmbxVoucherAmount">
+                            <ComboBoxItem Content="10"/>
+                            <ComboBoxItem Content="25"/>
+                            <ComboBoxItem Content="50"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel  Grid.Column="1" HorizontalAlignment="Center" Margin="10,2,10,1" Width="160">
+                        <TextBlock Style="{StaticResource titleText}">Vouchers Quantity</TextBlock>
+                        <ComboBox Width="60" IsReadOnly="True" SelectedIndex="0" HorizontalContentAlignment="Center"
+						Margin="10" x:Name="cmbxVoucherQuantity">
+                            <ComboBoxItem Content="1"/>
+                            <ComboBoxItem Content="2"/>
+                            <ComboBoxItem Content="3"/>
+                            <ComboBoxItem Content="4"/>
+                            <ComboBoxItem Content="5"/>
+                        </ComboBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Background="Bisque" Grid.Row="1">
+                        <TextBlock Style="{StaticResource titleText}"><Run Text="PIN code"/></TextBlock>
+                        <PasswordBox Width="60" Height="24" TextBlock.TextAlignment="Center" MaxLength="4" 
+						x:Name="txtPin"/>
+                    </StackPanel>
+                    <StackPanel  Grid.Column="1" Background="Bisque" Margin="1,0,0,0" Grid.Row="1">
+                        <TextBlock Style="{StaticResource titleText}" HorizontalAlignment="Center"><Run Text="Mobile Number"/></TextBlock>
+                        <TextBox Width="120" Height="26" Margin="10" TextAlignment="Center" FontSize="16"
+						FontFamily="Verdana" FontWeight="ExtraBold" MaxLength="8" Foreground="LightSeaGreen"
+						x:Name="txtNumber"/>
+                    </StackPanel>
+
+                    <TextBlock x:Name="txtStatus" HorizontalAlignment="Stretch" FontSize="16"
+					VerticalAlignment="Top"  Margin="10,10,0,-10"
+					Foreground="{Binding Brush, Source={x:Static local:App.Status}}" 
+					Text="{Binding Status, Source={x:Static local:App.Status}}"  Grid.Row="2"/>
+                    <TextBlock x:Name="txtMessages" HorizontalAlignment="Stretch"
+					VerticalAlignment="Bottom"  Margin="10,0,0,10" Foreground="Turquoise"
+					Text="{Binding Messages, Source={x:Static local:App.Status}}" Grid.Row="2"/>
+
+                    <TextBlock Name="euroCostText" Margin="8" HorizontalAlignment="Right" VerticalAlignment="Top"  Padding="3,0"
+                            Grid.Column="1" Grid.Row="2" Foreground="Black" Background="White"/>
+                    <Button HorizontalAlignment="Right" VerticalAlignment="Bottom" Padding="20,5" Margin="0,0,10,10"
+					Grid.Column="1" Click="btnSendRynga_Click" x:Name="btnSendRynga"
+					Style="{x:Null}" Height="30" Width="71" Grid.Row="2" Content="Send"/>
+
+                    <ListView x:Name="RecordsList"  Grid.ColumnSpan="2" Grid.Row="3" MaxHeight="128"
+					ItemsSource="{Binding Source={x:Static local:App.VoucherRecords}}" FontSize="12">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                            </Style>
+                        </ListView.ItemContainerStyle>
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Date">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Date, StringFormat={}{0:dd-MM-yy HH:mm}}"/>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Header="Voucher" DisplayMemberBinding="{Binding Voucher}"/>
+                                <GridViewColumn Header="Number" Width="65" DisplayMemberBinding="{Binding Number}"/>
+                                <GridViewColumn Header="Status">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Status}" x:Name="statusText" Foreground="Black"/>
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding Status}" Value="Sent">
+                                                    <Setter Property="Foreground" Value="Green" TargetName="statusText"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Status}" Value="Not Sent">
+                                                    <Setter Property="Foreground" Value="Red" TargetName="statusText"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StackPanel  HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Top">
+            <Label  ToolTip="Minimize" Content="-" Style="{StaticResource minimizeStyle}"
+			MouseLeftButtonDown="Label_MouseLeftButtonDown"/>
+            <Label ToolTip="Close" Content="X" Style="{StaticResource closeStyle}" MouseLeftButtonDown="Label_MouseLeftButtonDown"
+				   Name="closeApp"/>
+        </StackPanel>
+    </Grid>
+</Window>
